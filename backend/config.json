@@ -1,0 +1,8 @@
+{
+  "modo": "auto",
+  "usar_pir": true,
+  "usar_ldr": true,
+  "usar_horario": false,
+  "horario_inicio": "5:00",
+  "horario_fim": "06:00"
+}
