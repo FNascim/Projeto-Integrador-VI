@@ -27382,5 +27382,149 @@
     "event": "desligada_auto",
     "source": "pico",
     "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:35:07.154071",
+    "event": "ligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:35:40.907284",
+    "event": "desligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:35:41.635351",
+    "event": "ligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:35:42.357770",
+    "event": "desligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:35:42.971234",
+    "event": "ligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:35:43.586337",
+    "event": "desligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:35:53.734643",
+    "event": "ligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:35:54.383620",
+    "event": "desligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:35:55.044237",
+    "event": "ligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:36:05.997817",
+    "event": "desligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:36:33.493232",
+    "event": "ligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:36:50.943634",
+    "event": "desligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:39:37.228160",
+    "event": "ligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:39:47.673904",
+    "event": "desligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:40:00.118253",
+    "event": "ligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:40:10.750241",
+    "event": "desligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:41:18.874700",
+    "event": "ligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:41:29.948843",
+    "event": "desligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:42:19.897665",
+    "event": "ligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:42:29.823706",
+    "event": "desligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:43:51.965946",
+    "event": "ligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:44:02.891054",
+    "event": "desligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:53:16.042280",
+    "event": "ligada_auto",
+    "source": "pico",
+    "extra": {}
+  },
+  {
+    "timestamp": "2025-09-27T16:53:28.036544",
+    "event": "desligada_auto",
+    "source": "pico",
+    "extra": {}
   }
 ]
