@@ -1,10 +1,14 @@
 import ConfigForm from "./components/ConfigForm";
+import "./App.css";
 
 function App() {
   return (
-    <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-      <h1>Controle de Iluminação (Pico W)</h1>
-      <ConfigForm />
+    <div className="app">
+      <div className="app-container">
+        <h1 className="app-title">Controle de Iluminação</h1>
+        <p className="app-subtitle">Sistema inteligente com Pico W</p>
+        <ConfigForm />
+      </div>
     </div>
   );
 }

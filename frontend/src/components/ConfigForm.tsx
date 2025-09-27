@@ -1,262 +1,91 @@
-import { useEffect, useRef, useState } from "react";
-import { getConfig, updateConfig } from "../services/api";
+import { useState, useEffect } from "react";
+import { useConfig } from "../hooks/useConfig";
+import { useVoiceControl } from "../hooks/useVoiceControl";
+import { useFeedback } from "../hooks/useFeedback";
+import VoiceControl from "./VoiceControl";
+import FeedbackMessage from "./FeedbackMessage";
+import ConfigFormFields from "./ConfigFormFields";
 import type { Config } from "../types/config";
+import "./ConfigForm.css";
 
 export default function ConfigForm() {
-    const [config, setConfig] = useState<Config | null>(null);
-    const [error, setError] = useState<string | null>(null);
-    const [feedback, setFeedback] = useState<string | null>(null);
-    const [feedbackType, setFeedbackType] = useState<"success" | "error" | null>(null);
-    const recognitionRef = useRef<SpeechRecognition | null>(null);
-    const [voiceSupported, setVoiceSupported] = useState(true);
-    const [listening, setListening] = useState(false);
-    const [voiceFeedback, setVoiceFeedback] = useState<string | null>(null);
+  const { config, loading, error, updateConfigData } = useConfig();
+  const { feedback, feedbackType, showFeedback } = useFeedback();
+  const [localConfig, setLocalConfig] = useState<Config | null>(null);
 
-    useEffect(() => {
-        getConfig()
-            .then((data) => setConfig(data))
-            .catch((err) => {
-                console.error("Erro ao buscar config", err);
-                setError("Erro ao buscar configurações.");
-            });
-    }, []);
+  // Sincroniza config local quando o config global muda
+  useEffect(() => {
+    if (config && !localConfig) {
+      setLocalConfig(config);
+    }
+  }, [config, localConfig]);
 
-    useEffect(() => {
-        const SpeechRecognition =
-            (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+  const { voiceSupported, listening, voiceFeedback, startListening } =
+    useVoiceControl(localConfig || config, async newConfig => {
+      await updateConfigData(newConfig);
+      setLocalConfig(newConfig);
+      showFeedback("Configuração atualizada com sucesso!", "success");
+    });
 
-        if (!SpeechRecognition) {
-            console.warn("Este navegador não suporta reconhecimento de voz.");
-            setVoiceSupported(false);
-            return;
-        }
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const target = e.target;
+    const { name, value, type } = target;
+    if (!localConfig && !config) return;
 
-        setVoiceSupported(true);
+    const currentConfig = localConfig || config!;
 
-        const recognition = new SpeechRecognition();
-        recognition.lang = "pt-BR";
-        recognition.interimResults = false;
-        recognition.maxAlternatives = 1;
-
-        recognition.onstart = () => {
-            setListening(true);
-        };
-
-        recognition.onresult = (event: SpeechRecognitionEvent) => {
-            const command = event.results[0][0].transcript.toLowerCase().trim();
-            console.log("Comando de voz reconhecido:", command);
-            handleVoiceCommand(command);
-        };
-
-        recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-            console.error("Erro no reconhecimento de voz:", event.error);
-        };
-
-        recognition.onend = () => {
-            setListening(false);
-        };
-
-        recognitionRef.current = recognition;
-    }, [config]);
-
-    const startListening = () => {
-        recognitionRef.current?.start();
+    const updatedConfig = {
+      ...currentConfig,
+      [name]:
+        type === "checkbox" && target instanceof HTMLInputElement
+          ? target.checked
+          : value,
     };
 
-    const handleVoiceCommand = async (command: string) => {
-        if (!config) return;
+    setLocalConfig(updatedConfig);
+  };
 
-        let newConfig = { ...config };
-        let updated = false;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!localConfig) return;
 
-        if (command.includes("modo automático")) {
-            newConfig.modo = "auto";
-            updated = true;
-        } else if (command.includes("ligar luzes")) {
-            newConfig.modo = "manual_on";
-            updated = true;
-        } else if (command.includes("desativar luzes")) {
-            newConfig.modo = "manual_off";
-            updated = true;
-        }
+    try {
+      await updateConfigData(localConfig);
+      showFeedback("Configuração atualizada com sucesso!", "success");
+    } catch (err) {
+      showFeedback("Erro ao atualizar configuração.", "error");
+    }
+  };
 
-        if (command.includes("movimento on")) {
-            newConfig.usar_pir = true;
-            updated = true;
-        } else if (command.includes("movimento off")) {
-            newConfig.usar_pir = false;
-            updated = true;
-        }
+  if (loading) {
+    return <div className="config-form">Carregando configurações...</div>;
+  }
 
-        if (command.includes("luminosidade on")) {
-            newConfig.usar_ldr = true;
-            updated = true;
-        } else if (command.includes("luminosidade off")) {
-            newConfig.usar_ldr = false;
-            updated = true;
-        }
+  return (
+    <form onSubmit={handleSubmit} className="config-form">
+      {error && <div className="error-message">{error}</div>}
 
-        if (!updated) {
-            setVoiceFeedback("❓ Comando de voz não reconhecido.");
-            return;
-        }
+      {feedback && feedbackType && (
+        <FeedbackMessage message={feedback} type={feedbackType} />
+      )}
 
-        setConfig(newConfig);
-        setVoiceFeedback("✅ Comando reconhecido! Enviando configuração...");
+      <VoiceControl
+        voiceSupported={voiceSupported}
+        listening={listening}
+        voiceFeedback={voiceFeedback}
+        onStartListening={startListening}
+      />
 
-        try {
-            await updateConfig(newConfig);
-            setVoiceFeedback("✅ Configuração atualizada com sucesso!");
-        } catch (err) {
-            console.error("Erro ao atualizar via comando de voz:", err);
-            setVoiceFeedback("❌ Erro ao atualizar configuração.");
-        }
+      <ConfigFormFields
+        config={localConfig || config}
+        onChange={handleChange}
+      />
 
-        setTimeout(() => {
-            setVoiceFeedback(null);
-        }, 3000);
-    };
-
-    const handleChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-    ) => {
-        const target = e.target;
-        const { name, value, type } = target;
-        if (!config) return;
-
-        setConfig({
-            ...config,
-            [name]: type === "checkbox" && target instanceof HTMLInputElement
-                ? target.checked
-                : value,
-        });
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!config) return;
-        try {
-            await updateConfig(config);
-            setError(null);
-            setFeedback("Configuração atualizada com sucesso!");
-            setFeedbackType("success");
-            setTimeout(() => {
-                setFeedback(null);
-                setFeedbackType(null);
-            }, 3000);
-        } catch (err) {
-            console.error("Erro ao atualizar configuração:", err);
-            setFeedback("Erro ao atualizar configuração.");
-            setFeedbackType("error");
-            setTimeout(() => {
-                setFeedback(null);
-                setFeedbackType(null);
-            }, 3000);
-        }
-    };
-
-    return (
-        <form onSubmit={handleSubmit}>
-            {error && <div style={{ color: "red", marginBottom: "1em" }}>{error}</div>}
-            {feedback && (
-                <div style={{ marginBottom: "1em", color: feedbackType === "success" ? "green" : "red" }}>
-                    {feedback}
-                </div>
-            )}
-
-            <br /><br />
-            {!voiceSupported && (
-                <p style={{ color: "orange" }}>
-                    ⚠️ Seu navegador não suporta comandos de voz. Tente usar o Google Chrome.
-                </p>
-            )}
-
-            {voiceSupported && (
-                <div style={{ marginBottom: "1em" }}>
-                    <button type="button" onClick={startListening} disabled={listening}>
-                        {listening ? "🎤 Ouvindo..." : "Ativar Comando de Voz"}
-                    </button>
-
-                    {voiceFeedback && (
-                        <p style={{ color: voiceFeedback.startsWith("✅") ? "green" : "red" }}>
-                            {voiceFeedback}
-                        </p>
-                    )}
-                </div>
-            )}
-
-
-            <label>
-                Modo:
-                <select name="modo" value={config?.modo ?? ""} onChange={handleChange}>
-                    <option value="auto">Automático</option>
-                    <option value="manual_on">Manual ON</option>
-                    <option value="manual_off">Manual OFF</option>
-                </select>
-            </label>
-
-            <br />
-
-            <label>
-                <input
-                    type="checkbox"
-                    name="usar_pir"
-                    checked={!!config?.usar_pir}
-                    onChange={handleChange}
-                />
-                Usar sensor de movimento (PIR)
-            </label>
-
-            <br />
-
-            <label>
-                <input
-                    type="checkbox"
-                    name="usar_ldr"
-                    checked={!!config?.usar_ldr}
-                    onChange={handleChange}
-                />
-                Usar sensor de luminosidade (LDR)
-            </label>
-
-            <br />
-
-            <label>
-                <input
-                    type="checkbox"
-                    name="usar_horario"
-                    checked={!!config?.usar_horario}
-                    onChange={handleChange}
-                />
-                Usar horário programado
-            </label>
-
-            <br />
-
-            <label>
-                Horário Início:
-                <input
-                    type="time"
-                    name="horario_inicio"
-                    value={config?.horario_inicio ?? ""}
-                    onChange={handleChange}
-                />
-            </label>
-
-            <br />
-
-            <label>
-                Horário Fim:
-                <input
-                    type="time"
-                    name="horario_fim"
-                    value={config?.horario_fim ?? ""}
-                    onChange={handleChange}
-                />
-            </label>
-
-            <br />
-            <button type="submit">Salvar</button>
-        </form>
-    );
+      <button type="submit" className="submit-button">
+        Salvar Configurações
+      </button>
+    </form>
+  );
 }

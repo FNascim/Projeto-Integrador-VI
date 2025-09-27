@@ -6,7 +6,29 @@ Sistema inteligente de automação de iluminação residencial com foco em econo
 
 Este projeto consiste em um sistema completo de automação residencial que controla a iluminação de forma inteligente, utilizando sensores de movimento (PIR), luminosidade (LDR) e controle por horário. O sistema é composto por três partes principais: firmware para Raspberry Pi Pico W, backend em Python com Flask, e frontend web em React com TypeScript.
 
-## 🏗️ Arquitetura do Sistema
+## 🏗️ Arquitetura do Frontend
+
+### Organização do Código
+```
+src/
+├── components/          # Componentes React reutilizáveis
+├── hooks/              # Custom React Hooks
+│   ├── useConfig.ts    # Gerenciamento de configurações
+│   ├── useFeedback.ts  # Sistema de feedback/notificações
+│   └── useVoiceControl.ts # Controle de voz
+├── services/           # Serviços e chamadas de API
+├── types/              # Definições de tipos TypeScript  
+├── constants/          # Constantes da aplicação
+├── utils/              # Funções utilitárias
+└── assets/             # Recursos estáticos
+```
+
+### Custom Hooks
+- **useConfig**: Gerencia estado das configurações do sistema
+- **useFeedback**: Controla mensagens de sucesso/erro
+- **useVoiceControl**: Implementa reconhecimento de voz
+
+### Arquitetura do Sistema
 
 ```
 ┌─────────────────┐    Wi-Fi     ┌─────────────────┐    HTTP    ┌─────────────────┐
@@ -38,6 +60,29 @@ Este projeto consiste em um sistema completo de automação residencial que cont
 - Status dos sensores
 - Consumo otimizado de energia
 
+## 🛠️ Ferramentas de Desenvolvimento
+
+### Code Quality & Formatação
+- **ESLint**: Linting e análise estática do código
+- **Prettier**: Formatação automática consistente
+- **TypeScript**: Verificação de tipos em tempo de compilação
+- **VS Code Settings**: Configurações otimizadas para o projeto
+
+### Scripts Automatizados
+```bash
+# Formatação de código
+npm run format        # Formatar todos os arquivos
+npm run format:check  # Verificar formatação
+
+# Linting
+npm run lint          # Verificar código
+npm run lint:fix      # Corrigir automaticamente
+
+# Build & Deploy
+npm run build         # Build para produção
+npm run preview       # Preview do build
+```
+
 ## 🛠️ Tecnologias Utilizadas
 
 ### Hardware
@@ -55,8 +100,10 @@ Este projeto consiste em um sistema completo de automação residencial que cont
 ### Frontend
 - **React 19** - Biblioteca UI
 - **TypeScript** - Tipagem estática
-- **Vite** - Build tool
+- **Vite** - Build tool e desenvolvimento
 - **Axios** - Cliente HTTP
+- **ESLint** - Linting e qualidade de código
+- **Prettier** - Formatação automática de código
 - **Web Speech API** - Reconhecimento de voz
 
 ## 📁 Estrutura do Projeto
@@ -68,19 +115,37 @@ Projeto-Integrador-VI/
 │   ├── app.py                 # Servidor principal
 │   ├── config.json            # Configurações do sistema
 │   ├── events.json            # Log de eventos
-│   └── requirements.txt       # Dependências Python
+│   ├── requirements.txt       # Dependências Python
+│   ├── venv/                  # Ambiente virtual Python
+│   └── .gitignore             # Arquivos ignorados pelo Git
 ├── frontend/                   # Interface web React
 │   ├── src/
 │   │   ├── components/
 │   │   │   └── ConfigForm.tsx # Formulário de configuração
+│   │   ├── hooks/             # Custom React Hooks
+│   │   │   ├── useConfig.ts   # Hook para configurações
+│   │   │   ├── useFeedback.ts # Hook para feedback
+│   │   │   └── useVoiceControl.ts # Hook para controle de voz
 │   │   ├── services/
 │   │   │   └── api.ts         # Cliente API
 │   │   ├── types/
 │   │   │   └── config.ts      # Tipos TypeScript
+│   │   ├── constants/
+│   │   │   └── appConstants.ts # Constantes da aplicação
+│   │   ├── utils/
+│   │   │   └── helpers.ts     # Funções utilitárias
 │   │   ├── App.tsx            # Componente principal
 │   │   └── main.tsx           # Entry point
-│   ├── package.json
-│   └── vite.config.ts
+│   ├── .vscode/               # Configurações VS Code
+│   ├── dist/                  # Build de produção
+│   ├── node_modules/          # Dependências Node.js
+│   ├── package.json           # Configurações e scripts npm
+│   ├── .prettierrc           # Configurações Prettier
+│   ├── .prettierignore       # Arquivos ignorados pelo Prettier
+│   ├── eslint.config.js      # Configurações ESLint
+│   ├── vite.config.ts        # Configurações Vite
+│   ├── FORMATACAO.md         # Documentação de formatação
+│   └── .gitignore            # Arquivos ignorados pelo Git
 └── RaspberryPiPicoW/          # Firmware do microcontrolador
     └── main.py                # Código principal do Pico W
 ```
@@ -98,7 +163,16 @@ Projeto-Integrador-VI/
 
 ```bash
 cd backend
+
+# Criar ambiente virtual (recomendado)
+python -m venv venv
+venv\Scripts\activate  # Windows
+# ou source venv/bin/activate  # Linux/Mac
+
+# Instalar dependências
 pip install -r requirements.txt
+
+# Executar servidor
 python app.py
 ```
 
@@ -111,6 +185,15 @@ cd frontend
 npm install
 npm run dev
 ```
+
+**Scripts disponíveis:**
+- `npm run dev` - Servidor de desenvolvimento
+- `npm run build` - Build para produção  
+- `npm run lint` - Verificar código com ESLint
+- `npm run lint:fix` - Corrigir automaticamente erros do ESLint
+- `npm run format` - Formatar código com Prettier
+- `npm run format:check` - Verificar formatação do código
+- `npm run preview` - Preview do build de produção
 
 A aplicação web estará disponível em `http://localhost:5173`
 
@@ -180,6 +263,24 @@ O sistema registra automaticamente:
 - Mudanças de configuração
 - Horários de ativação
 - Fonte da ação (manual/automática)
+
+## 💡 Ambiente de Desenvolvimento
+
+### Recomendações VS Code
+- **Extensões sugeridas**: Prettier, ESLint, TypeScript
+- **Configurações otimizadas**: Auto-formatação ao salvar habilitada
+- **IntelliSense**: Suporte completo para TypeScript e React
+
+### Controle de Qualidade
+- **Pre-commit hooks**: Formatação automática antes dos commits
+- **Linting contínuo**: Verificação em tempo real
+- **Type checking**: Validação de tipos TypeScript
+- **Consistent coding style**: Regras Prettier padronizadas
+
+### Ambiente Virtual Python
+- **Backend isolado**: Dependências isoladas em `venv/`
+- **Requirements.txt**: Versões fixas das dependências
+- **Cross-platform**: Compatível Windows/Linux/Mac
 
 ## 🤝 Contribuição
 
