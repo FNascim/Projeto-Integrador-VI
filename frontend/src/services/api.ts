@@ -1,7 +1,7 @@
 import axios from "axios";
 import type { Config } from "../types/config";
 
-const API_BASE = "http://192.168.15.4:5000";
+const API_BASE = "http://127.0.0.1:5000";
 
 export const getConfig = async (): Promise<Config> => {
   const res = await axios.get<Config>(`${API_BASE}/config`);
