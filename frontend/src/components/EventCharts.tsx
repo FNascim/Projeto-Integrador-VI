@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useEventLog } from "../hooks/useEventLog";
+import { getDailyUsageForThisWeek } from "../utils/chartHelpers";
+import type { ChartData } from "chart.js";
+import UsageChart from "./UsageChart";
 import "./EventCharts.css";
 
 type ChartInterval = "week" | "month" | "year";
@@ -7,6 +10,7 @@ type ChartInterval = "week" | "month" | "year";
 export default function EventsChart() {
   const { eventList, loading, error } = useEventLog();
   const [chartInterval, setChartInterval] = useState<ChartInterval>("week");
+  const [chartData, setChartData] = useState<ChartData<"line"> | null>(null);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -14,6 +18,10 @@ export default function EventsChart() {
     const newCategory = e.target.value as ChartInterval;
     setChartInterval(newCategory);
   };
+
+  useEffect(() => {
+    setChartData(getDailyUsageForThisWeek(eventList));
+  }, [eventList]);
 
   return (
     <section className="event-charts">
@@ -34,7 +42,7 @@ export default function EventsChart() {
         </select>
       </form>
 
-      <p>TODO tipo de dado: {chartInterval}</p>
+      {chartData && chartInterval === "week" && <UsageChart data={chartData} />}
     </section>
   );
 }
