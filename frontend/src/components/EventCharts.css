@@ -6,3 +6,12 @@
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+.chart-form-select {
+  background-color: #333;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 1rem;
+  padding: 0.5rem;
+}
+
