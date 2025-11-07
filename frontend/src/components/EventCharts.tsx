@@ -18,24 +18,29 @@ export default function EventsChart() {
 
   return (
     <section className="event-charts">
-      <h2>Tempo de uso</h2>
+      <div className="event-charts-header">
+        <h2>Tempo de uso</h2>
+        <form method="post" className="chart-form">
+          <select
+            className="chart-form-select"
+            name="interval"
+            value={chartInterval}
+            onChange={handleChange}
+          >
+            <option value="7">Últimos 7 dias</option>
+            <option value="30">Últimos 30 dias</option>
+            <option value="60">Últimos 60 dias</option>
+          </select>
+        </form>
+      </div>
 
       {error && <p className="error-message">{error}</p>}
 
-      <form method="post">
-        <select
-          className="chart-form-select"
-          name="interval"
-          value={chartInterval}
-          onChange={handleChange}
-        >
-          <option value="7">Últimos 7 dias</option>
-          <option value="30">Últimos 30 dias</option>
-          <option value="60">Últimos 60 dias</option>
-        </select>
-      </form>
       {loading ? (
-        <div>Carregando...</div>
+        <div className="chart-loading">
+          <div className="chart-loading-spinner"></div>
+          <p className="chart-loading-label">Carregando...</p>
+        </div>
       ) : (
         <UsageChart events={eventList} interval={chartInterval} />
       )}

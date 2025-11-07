@@ -7,11 +7,56 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.event-charts-header {
+  align-items: center;
+  display: flex;
+}
+
+.chart-form {
+  margin-left: auto;
+}
+
 .chart-form-select {
   background-color: #333;
-  border: 1px solid #ced4da;
+  border: none;
   border-radius: 4px;
   font-size: 1rem;
   padding: 0.5rem;
+}
+
+.chart-loading {
+  padding: 2rem 0;
+}
+
+.chart-loading-spinner {
+  animation: spin 2s linear 0s infinite;
+  border-radius: 50%;
+  border: 2px solid;
+  border-right: none;
+  border-left: none;
+  height: 2rem;
+  margin: 0 auto;
+  width: 2rem;
+}
+
+.chart-loading-label {
+  text-align: center;
+}
+
+@keyframes spin {
+  0% {
+    border-color: #764ba2;
+    transform: rotate(0);
+  }
+
+  50% {
+    border-color: #213547;
+    transform: rotate(180deg);
+  }
+
+  100% {
+    border-color: #764ba2;
+    transform: rotate(360deg);
+  }
 }
 
