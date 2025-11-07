@@ -1,66 +1,99 @@
-import { getDay, isSameWeek, isSameDay, endOfDay, startOfDay } from "date-fns";
+import { isToday, endOfDay, startOfDay, formatISO } from "date-fns";
 import type { EventLog } from "../types/eventLog";
-import type { ChartData } from "chart.js";
 
 /**
- * Retorna o tempo que a lâmpada ficou ligada durante cada dia da semana atual
- * TODO: tem um jeito mais limpo de fazer isso?
+ * Para o cálculo do tempo de uso é necessário que:
+ * 1. O primeiro evento do dia deve ser do tipo 'ligada'
+ * 2. O último evento do dia deve ser do tipo 'desligada'
+ * 3. O número de eventos ligada e desligada deve ser o mesmo
+ *
+ * Funcionamento:
+ *   - eventos do tipo 'ligada' tem timestamp negativo
+ *   - eventos do tipo 'desligada' tem timestamp positivo
+ *   - diferença = 'desligada' + 'ligada'
+ *   - a soma das diferenças é o tempo de uso no dia
  */
-export function getDailyUsageForThisWeek(
-  eventList: EventLog[]
-): ChartData<"line"> {
-  const weekLabels = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
-  const today = Date.now();
-  // Variável abaixo é temporária para testar os dados
-  // const today = "2025-09-25T22:56:47.124235";
-  const eventsFromThisWeek = eventList.filter(({ timestamp }) =>
-    isSameWeek(today, timestamp)
-  );
 
-  // Cada índice corresponde a um dia da semana
-  const usage: number[] = new Array(7).fill(0);
-  let lastTimeTurnedOn: Date | null = null;
+/**
+ * Essa função cuida dos pontos 1 e 2 adicionando eventos no início e fim
+ * do dia, se necessário.
+ * O array de entrada é modificado diretamente por referência
+ */
+const handleEventsBetweenDays = (eventList: EventLog[]): void => {
+  const firstEvent = eventList[0];
+  const lastEvent = eventList[eventList.length - 1];
 
-  for (let i = 0; i < eventsFromThisWeek.length; i++) {
-    const eventTime = new Date(eventsFromThisWeek[i].timestamp);
-    const typeOfEvent = eventsFromThisWeek[i].event;
-
-    if (typeOfEvent === "ligada_manual" || typeOfEvent === "ligada_auto") {
-      // Salva a hora que a lâmpada foi ligada
-      lastTimeTurnedOn = eventTime;
-    } else if (lastTimeTurnedOn) {
-      // Se a lâmpada estava ligada calcula o tempo que ficou ligada
-      if (isSameDay(lastTimeTurnedOn, eventTime)) {
-        // Quando foi ligada e desligada no mesmo dia
-        const dayOfTheEvent = getDay(eventTime);
-        const timePassed = eventTime.getTime() - lastTimeTurnedOn.getTime();
-        usage[dayOfTheEvent] += timePassed;
-      } else {
-        // Quando foi ligada em um dia e desligada no outro
-        const firstDay = getDay(lastTimeTurnedOn);
-        const lastDay = getDay(eventTime);
-        const timePassedForFirstDay =
-          endOfDay(lastTimeTurnedOn).getTime() - lastTimeTurnedOn.getTime();
-        const timePassedForLastDay =
-          startOfDay(eventTime).getTime() - eventTime.getTime();
-        usage[firstDay] += timePassedForFirstDay;
-        usage[lastDay] += timePassedForLastDay;
-      }
-
-      lastTimeTurnedOn = null;
-    }
+  // Se a lâmpada estava ligada antes do início do dia
+  if (
+    firstEvent.event === "desligada_auto" ||
+    firstEvent.event === "desligada_manual"
+  ) {
+    // Adicione um evento de ligar no início do dia
+    eventList.unshift({
+      timestamp: formatISO(startOfDay(firstEvent.timestamp)),
+      event: "ligada_auto",
+      source: "pico",
+    });
   }
 
-  const usageInHour = usage.map(valueInMs => valueInMs / 1000 / 60 / 60);
+  // Se a lâmpada foi deixada ligada ao final do dia
+  if (
+    lastEvent.event === "ligada_auto" ||
+    lastEvent.event === "ligada_manual"
+  ) {
+    // Se o dia ainda não acabou
+    if (isToday(lastEvent.timestamp)) {
+      // Adicione um evento de desligar a lâmpada agora
+      eventList.push({
+        timestamp: formatISO(Date.now()),
+        event: "desligada_auto",
+        source: "pico",
+      });
+    } else {
+      // Adicione um evento de desligar ao final do dia
+      eventList.push({
+        timestamp: formatISO(endOfDay(firstEvent.timestamp)),
+        event: "desligada_auto",
+        source: "pico",
+      });
+    }
+  }
+};
 
-  return {
-    labels: weekLabels,
-    datasets: [
-      {
-        label: "Tempo ligada (h)",
-        data: usageInHour,
+interface UsageByDay {
+  x: string;
+  y: number;
+}
+
+export function getUsageByDay(eventList: EventLog[]): UsageByDay[] {
+  // Agrupa os eventos por dia
+  // @ts-expect-error esse método é recente e o typescript gera alguns erros
+  const groupedEventsByDay = Object.groupBy(eventList, ({ timestamp }) =>
+    formatISO(timestamp, { representation: "date" })
+  );
+
+  // Ajusta os dados
+  Object.values(groupedEventsByDay).forEach(eventArray => {
+    handleEventsBetweenDays(eventArray as EventLog[]);
+  });
+
+  // Cria os objetos do tipo { x: 'date', y: 'valor' }
+  const result = Object.entries(groupedEventsByDay).map(([key, value]) => {
+    const totalTime = (value as EventLog[]).reduce(
+      (acc, { timestamp, event }) => {
+        const timeInMs = new Date(timestamp).getTime();
+        if (event === "ligada_auto" || event === "ligada_manual") {
+          return acc - timeInMs;
+        } else {
+          return acc + timeInMs;
+        }
       },
-    ],
-  };
+      0
+    );
+
+    return { x: key, y: totalTime / 1000 / 60 / 60 };
+  });
+
+  return result;
 }
 

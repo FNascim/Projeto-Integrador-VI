@@ -1,16 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useEventLog } from "../hooks/useEventLog";
-import { getDailyUsageForThisWeek } from "../utils/chartHelpers";
-import type { ChartData } from "chart.js";
 import UsageChart from "./UsageChart";
 import "./EventCharts.css";
 
-type ChartInterval = "week" | "month" | "year";
+type ChartInterval = "7" | "30" | "365";
 
 export default function EventsChart() {
   const { eventList, loading, error } = useEventLog();
-  const [chartInterval, setChartInterval] = useState<ChartInterval>("week");
-  const [chartData, setChartData] = useState<ChartData<"line"> | null>(null);
+  const [chartInterval, setChartInterval] = useState<ChartInterval>("7");
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -18,10 +15,6 @@ export default function EventsChart() {
     const newCategory = e.target.value as ChartInterval;
     setChartInterval(newCategory);
   };
-
-  useEffect(() => {
-    setChartData(getDailyUsageForThisWeek(eventList));
-  }, [eventList]);
 
   return (
     <section className="event-charts">
@@ -36,13 +29,16 @@ export default function EventsChart() {
           value={chartInterval}
           onChange={handleChange}
         >
-          <option value="week">Semana atual</option>
-          <option value="month">Mês atual</option>
-          <option value="year">Ano atual</option>
+          <option value="7">Semana atual</option>
+          <option value="30">Mês atual</option>
+          <option value="365">Ano atual</option>
         </select>
       </form>
-
-      {chartData && chartInterval === "week" && <UsageChart data={chartData} />}
+      {loading ? (
+        <div>Carregando...</div>
+      ) : (
+        <UsageChart events={eventList} interval={chartInterval} />
+      )}
     </section>
   );
 }
