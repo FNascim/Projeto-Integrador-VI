@@ -3,15 +3,15 @@ import {
   TimeScale,
   CategoryScale,
   LinearScale,
+  BarElement,
   PointElement,
-  LineElement,
   Title,
   Tooltip,
   Legend,
 } from "chart.js";
-import { Line } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 import { getUsageByDay } from "../utils/chartHelpers";
-import { isWithinInterval, subDays } from "date-fns";
+import { isWithinInterval, subDays, formatISO } from "date-fns";
 import type { ChartOptions } from "chart.js";
 import type { EventLog } from "../types/eventLog";
 import "chartjs-adapter-date-fns";
@@ -20,8 +20,8 @@ Chart.register(
   TimeScale,
   CategoryScale,
   LinearScale,
+  BarElement,
   PointElement,
-  LineElement,
   Title,
   Tooltip,
   Legend
@@ -49,7 +49,7 @@ export default function UsageChart({ events, interval }: UsageChartProps) {
     ],
   };
 
-  const options: ChartOptions<"line"> = {
+  const options: ChartOptions<"bar"> = {
     plugins: {
       legend: {
         labels: {
@@ -65,21 +65,17 @@ export default function UsageChart({ events, interval }: UsageChartProps) {
         time: {
           unit: "day",
         },
+        min: formatISO(startOfInterval),
       },
       y: { ticks: { color: "#ced4da" }, border: { color: "#ced4da" } },
     },
     elements: {
-      line: {
+      bar: {
         backgroundColor: "#213547",
-        borderColor: "#213547",
-      },
-      point: {
-        backgroundColor: "#213547",
-        radius: 4,
       },
     },
   };
 
-  return <Line options={options} data={data} />;
+  return <Bar options={options} data={data} />;
 }
 

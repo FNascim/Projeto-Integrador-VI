@@ -3,7 +3,7 @@ import { useEventLog } from "../hooks/useEventLog";
 import UsageChart from "./UsageChart";
 import "./EventCharts.css";
 
-type ChartInterval = "7" | "30" | "365";
+type ChartInterval = "7" | "30" | "60";
 
 export default function EventsChart() {
   const { eventList, loading, error } = useEventLog();
@@ -29,9 +29,9 @@ export default function EventsChart() {
           value={chartInterval}
           onChange={handleChange}
         >
-          <option value="7">Semana atual</option>
-          <option value="30">Mês atual</option>
-          <option value="365">Ano atual</option>
+          <option value="7">Últimos 7 dias</option>
+          <option value="30">Últimos 30 dias</option>
+          <option value="60">Últimos 60 dias</option>
         </select>
       </form>
       {loading ? (
