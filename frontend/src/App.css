@@ -30,6 +30,11 @@
   font-weight: 300;
 }
 
+.app-chart-button {
+  display: block;
+  margin: 1rem auto;
+}
+
 @media (max-width: 768px) {
   .app {
     padding: 1rem 0.5rem;
@@ -43,3 +48,4 @@
     font-size: 1rem;
   }
 }
+
